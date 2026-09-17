@@ -98,9 +98,13 @@ jobs:
         shell: pwsh
         run: |
           $sdkRoot = 'C:\Program Files (x86)\Windows Kits\10\bin'
-          $sdkVersion = Get-ChildItem $sdkRoot -Directory | Sort-Object Name -Descending | Select-Object -First 1
-          if (-not $sdkVersion) { throw 'Windows SDK tools were not found.' }
-          "$($sdkVersion.FullName)\x64" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          $signTool = Get-ChildItem $sdkRoot -Filter signtool.exe -Recurse -File |
+            Where-Object { $_.Directory.Name -eq 'x64' } |
+            Sort-Object FullName -Descending |
+            Select-Object -First 1
+          if (-not $signTool) { throw 'The x64 Windows SDK signtool.exe was not found.' }
+          $signTool.DirectoryName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          Write-Host "Using Windows SDK tools from $($signTool.DirectoryName)"
 
       - name: Install dependencies
         shell: pwsh
