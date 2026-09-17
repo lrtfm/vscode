@@ -54,15 +54,12 @@ jobs:
 
       - name: Build Code - OSS
         run: |
-          for attempt in 1 2; do
-            if npm run gulp vscode-darwin-arm64-min; then
-              exit 0
-            fi
-            if [ "$attempt" -eq 2 ]; then
-              exit 1
-            fi
-            echo "::warning::macOS packaging failed once; retrying the upstream build task."
-          done
+          npm run gulp core-ci
+          npm run gulp compile-extensions-build
+          npm run gulp compile-copilot-extension-build
+          npm run gulp compile-extension-media-build
+          test -d .build/extensions/copilot/node_modules/@github/copilot/sdk
+          npm run gulp vscode-darwin-arm64-min-ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
